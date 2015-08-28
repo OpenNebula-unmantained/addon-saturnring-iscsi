@@ -1,0 +1,106 @@
+#!/bin/bash
+#Copyright 2014 Blackberry Limited
+#
+#Licensed under the Apache License, Version 2.0 (the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License.
+
+#Credits - parts of this code picked up from https://github.com/OpenNebula/addon-iscsi
+
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+. $LIB_LOCATION/sh/scripts_common.sh
+
+
+DRIVER_PATH=$(dirname $0)
+
+
+DRV_ACTION=$1
+ID=$2
+
+. "$DRIVER_PATH/commonsaturniscsi"
+. "$DRIVER_PATH/saturniscsi.conf"
+XPATH="${DRIVER_PATH}/../xpath.rb -b $DRV_ACTION"
+
+unset i j XPATH_ELEMENTS
+
+while IFS= read -r -d '' element; do
+    XPATH_ELEMENTS[i++]="$element"
+
+done < <($XPATH     /DS_DRIVER_ACTION_DATA/DATASTORE/ID \
+                    /DS_DRIVER_ACTION_DATA/DATASTORE/NAME \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/TEMPLATE/AAGROUP \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/TEMPLATE/DESCRIPTION \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/ID \
+                    /DS_DRIVER_ACTION_DATA/IMAGE/SIZE )
+DSID="${XPATH_ELEMENTS[j++]}"
+DSNAME="${XPATH_ELEMENTS[j++]}"
+AAGROUP="${XPATH_ELEMENTS[j++]}"
+DESCRIPTION="${XPATH_ELEMENTS[j++]}"
+IMAGEID="${XPATH_ELEMENTS[j++]}"
+SIZE="${XPATH_ELEMENTS[j++]}"
+SIZE_GB=$(MB_to_GB "${SIZE}")
+
+DST_HOST=`get_destination_host $ID`
+
+
+RTNSTR=$( . "$DRIVER_PATH/saturniscsi.conf"; curl -s -X GET "${SATURNRINGURL}/api/provisioner/" \
+  -d "sizeinGB=$SIZE_GB" \
+  -d "clientiqn=iqn.iscsihypervisor.$SATURNRINGUSER-$DSNAME-$DSID-$IMAGEID" \
+  -d "serviceName=$SATURNRINGUSER-$DSNAME-$DSID-$IMAGEID" \
+  -d "aagroup=$AAGROUP" \
+  -u "$SATURNRINGUSER:$SATURNRINGPASSWORD" )
+
+ERROR=$(GetKey "${RTNSTR}" "error")
+
+cat << EOF > /tmp/createpassedparameters.txt
+ERROR: $ERROR
+DSID: $DSID
+DSName: $DSNAME
+SaturnringURL: $SATURNRINGURL
+SaturnringUser: $SATURNRINGUSER
+SaturnringPassword: $SATURNRINGPASSWORD
+AAGroup: $AAGROUP
+Description: $DESCRIPTION
+ImageID: $IMAGEID
+Size: $SIZE
+Rtnstr: $RTNSTR
+EOF
+
+if [ "$ERROR" != "0" ]
+then
+read -r -d '' DBGVAR << EOM
+Rtnstr: $RTNSTR
+Saturn Provisioning debugging information
+ERROR: $ERROR
+DSID: $DSID
+DSName: $DSNAME
+SaturnringURL: $SATURNRINGURL
+SaturnringUser: $SATURNRINGUSER
+SaturnringPassword: Make sure special characters are not causing trouble
+AAGroup: $AAGROUP
+Description: $DESCRIPTION
+ImageID: $IMAGEID
+Size: $SIZE
+EOM
+error_message "Saturn datastore image provisioning error: $DBGVAR"
+exit -1
+fi
+
+
+#If all ok then return IQN and StoreIP1
+IQN=$(GetKey "$RTNSTR" "iqntar")
+STOREIP1=$(GetKey "${RTNSTR}" "targethost__storageip1")
+echo "$IQN"-_-_-"$STOREIP1"

@@ -1,0 +1,37 @@
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "naelyn/ubuntu-trusty64-libvirt"
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.define "onefrontend" do |onefrontend|
+    onefrontend.vm.hostname="onefrontend"
+    onefrontend.vm.network :private_network, :ip => "192.168.50.16"
+    onefrontend.vm.provision "shell", path: "sharedstuff/onegeneric.sh"
+    onefrontend.vm.provider :libvirt do |domain|
+      domain.memory = 512
+      domain.cpus = 2
+      domain.nested = true
+    end
+  end
+  config.vm.define "hypervisor1" do |hypervisor1|
+    hypervisor1.vm.hostname="hypervisor1"
+    hypervisor1.vm.network :private_network, :ip => "192.168.50.17"
+    hypervisor1.vm.provision "shell", path: "sharedstuff/onegeneric.sh"
+    hypervisor1.vm.provider :libvirt do |domain|
+      domain.memory = 2048
+      domain.cpus = 3
+      domain.nested = true
+    end
+  end
+  config.vm.define "hypervisor2" do |hypervisor2|
+    hypervisor2.vm.hostname="hypervisor2"
+    hypervisor2.vm.network :private_network, :ip => "192.168.50.18"
+    hypervisor2.vm.provision "shell", path: "sharedstuff/onegeneric.sh"
+    hypervisor2.vm.provider :libvirt do |domain|
+      domain.memory = 2048
+      domain.cpus = 3
+      domain.nested = true
+    end
+  end
+end

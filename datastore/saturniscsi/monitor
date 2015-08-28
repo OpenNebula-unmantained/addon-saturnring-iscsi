@@ -1,0 +1,68 @@
+#!/bin/bash
+#!/bin/bash
+#Copyright 2015 Blackberry Limited
+#
+#Licensed under the Apache License, Version 2.0 (the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License
+
+if [ -z "${ONE_LOCATION}" ]; then
+    LIB_LOCATION=/usr/lib/one
+else
+    LIB_LOCATION=$ONE_LOCATION/lib
+fi
+
+. $LIB_LOCATION/sh/scripts_common.sh
+
+DRIVER_PATH=$(dirname $0)
+
+. "$DRIVER_PATH/commonsaturniscsi"
+. "$DRIVER_PATH/saturniscsi.conf"
+
+DRV_ACTION=$1
+ID=$2
+
+RTNSTR=$( "$DRIVER_PATH/saturniscsi.conf";curl -s -X GET "${SATURNRINGURL}/api/userstats/" \
+  -u "$SATURNRINGUSER:$SATURNRINGPASSWORD" )
+
+ERROR=$(GetKey "${RTNSTR}" "error")
+
+cat << EOF > /tmp/userquota.txt
+ERROR: $ERROR
+SaturnringURL: $SATURNRINGURL
+SaturnringUser: $SATURNRINGUSER
+SaturnringPassword: $SATURNRINGPASSWORD
+Rtnstr: $RTNSTR
+EOF
+
+if [ "$ERROR" != "0" ]
+then
+read -r -d '' DBGVAR << EOM
+Rtnstr: $RTNSTR
+Saturn User update debugging information
+ERROR: $ERROR
+SaturnringURL: $SATURNRINGURL
+SaturnringUser: $SATURNRINGUSER
+SaturnringPassword: Make sure special characters are not causing trouble
+EOM
+error_message "Saturn datastore monitoring error: $DBGVAR"
+exit -1
+fi
+
+USED_GB=$(GetKey "${RTNSTR}" "used")
+TOTAL_GB=$(GetKey "${RTNSTR}" "total")
+
+USED_MB=$(GB_to_MB "${USED_GB}")
+TOTAL_MB=$(GB_to_MB "${TOTAL_GB}")
+
+echo "USED_MB=$USED_MB"
+echo "TOTAL_MB=$TOTAL_MB"
+echo "FREE_MB=$(( $TOTAL_MB - $USED_MB ))"

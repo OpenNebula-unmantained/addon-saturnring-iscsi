@@ -1,0 +1,45 @@
+#!/bin/bash
+#Copyright 2015 Blackberry Limited
+#
+#Licensed under the Apache License, Version 2.0 (the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License
+
+function GetKey () {
+        PY_SCRIPT="import sys;import json;print json.loads(sys.argv[1])[sys.argv[2]];"
+        OUTPUT=$(  python -c "$PY_SCRIPT" "$1" "$2"  )
+        echo ${OUTPUT}
+}
+
+function GB_to_MB () {
+        PY_SCRIPT="import sys;print int(float(sys.argv[1]) * 1000)"
+        OUTPUT=$(  python -c "$PY_SCRIPT" "$1"  )
+        echo ${OUTPUT}
+}
+
+function MB_to_GB () {
+        PY_SCRIPT="import sys; import math; print math.ceil(float(sys.argv[1]) / 1000)"
+        OUTPUT=$(  python -c "$PY_SCRIPT" "$1"  )
+        echo ${OUTPUT}
+}
+
+#Return the first substring after split
+function SplitA () {
+        PY_SCRIPT="import sys; print sys.argv[1].split(sys.argv[2])[0]"
+        OUTPUT=$(  python -c "$PY_SCRIPT" "$1" "$2"  )
+        echo ${OUTPUT}
+      }
+#Return the second substring after the split
+function SplitB () {
+        PY_SCRIPT="import sys; print sys.argv[1].split(sys.argv[2])[1]"
+        OUTPUT=$(  python -c "$PY_SCRIPT" "$1" "$2"  )
+        echo ${OUTPUT}
+      }
