@@ -9,7 +9,11 @@ Read more about [OpenNebula](http://opennebula.org/), private and hybrid enterpr
 
 A good use case would be SSD-class storage, exported via iSCSI over a high-performance network, and made available to OpenNebula VMs as a persistent image to support high IOPs, low latency workloads.
 
-System datastore is currently not supported.
+##Compatibility and Limitations
+
+* Tested on OpenNebula 4.12.
+
+* System datastore is currently not supported.
 
 ## Design
 The Saturn OpenNebula driver is based on the [datastore drivers structure](http://docs.opennebula.org/4.12/integration/infrastructure_integration/sd.html) of OpenNebula. It also borrows ideas and code from the [OpenNebula addon-iscsi driver] (https://github.com/OpenNebula/addon-iscsi), which allows OpenNebula to create an iSCSI datastore from a single [tgt iscsi server](http://stgt.sourceforge.net/). Users wanting to understand the discussion may want to keep these two references handy.
@@ -183,3 +187,27 @@ _Note: if a Saturn image goes into `err` state (seen in the `oneimage list` comm
 Developing the driver can be accomplished on the [sandbox OpenNebula VM](http://opennebula.org/tryout/sandboxvirtualbox/), but testing opportunities are limited because only 1 hypervisor is available (so VM migration testing is not possible). In addition, Virtualbox does not work with 64-bit nested VMs, limiting the developer to only 32-bit VMs.
 
 For this reason, a multiple-hypervisor OpenNebula KVM-Vagrant setup is provided in the `on-devenv` directory. Note that it is not possible to run both virtualbox and KVM on the same hosts at present. So if the saturn storage is also setup as a Vagrant environment then it also needs to be on KVM hypervisors. Please refer to the README file in that directory for further information.
+
+
+
+
+## Contributors
+
+Sachin Agarwal <sachinkagarwal@gmail.com>
+
+## License
+
+Apache 2.0 license
+http://www.apache.org/licenses/LICENSE-2.0
+
+## Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
