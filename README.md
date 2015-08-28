@@ -115,7 +115,7 @@ example (for Ubuntu)
 sudo apt-get install open-iscsi
 RANDOM=`date +%s`$$
 cat <<EOF > /etc/iscsi/initiatorname.iscsi
-iqn.iscsihypervisor${RANDOM}${RANDOM}.ini
+InitiatorName=iqn.iscsihypervisor${RANDOM}${RANDOM}.ini
 EOF
 service open-iscsi restart
 ```
