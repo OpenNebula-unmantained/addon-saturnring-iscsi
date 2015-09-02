@@ -9,7 +9,26 @@ Read more about [OpenNebula](http://opennebula.org/), private and hybrid enterpr
 
 A good use case would be SSD-class storage, exported via iSCSI over a high-performance network, and made available to OpenNebula VMs as a persistent image to support high IOPs, low latency workloads.
 
-##Compatibility and Limitations
+## Authors
+
+Sachin Agarwal <sachinkagarwal@gmail.com>
+
+## Requirements
+
+* Open-iscsi software on the hypervisors (http://www.open-iscsi.org/)
+
+
+## Development
+
+Developing the driver can be accomplished on the [sandbox OpenNebula VM](http://opennebula.org/tryout/sandboxvirtualbox/), but testing opportunities are limited because only 1 hypervisor is available (so VM migration testing is not possible). In addition, Virtualbox does not work with 64-bit nested VMs, limiting the developer to only 32-bit VMs.
+
+For this reason, a multiple-hypervisor OpenNebula KVM-Vagrant setup is provided in the `on-devenv` directory. Note that it is not possible to run both virtualbox and KVM on the same hosts at present. So if the saturn storage is also setup as a Vagrant environment then it also needs to be on KVM hypervisors. Please refer to the README file in that directory for further information.
+
+A virtual saturnring storage cluster can also be setup using a KVM-Vagrant setup. For details refer to [Saturnring development](https://github.com/sachinkagarwal/saturnring/blob/master/devenv/README.md).
+
+The below discussion on the Design of the driver is a good starting point to start  driver development.
+
+## Compatibility and Limitations
 
 * Tested on OpenNebula 4.12.
 
@@ -182,13 +201,6 @@ TBD - table of error cases and synptoms/logs/troubleshooting
 
 _Note: if a Saturn image goes into `err` state (seen in the `oneimage list` command), run `oneimage enable <imageid>` to get it back into `Rdy` state_.
 
-## Development
-
-Developing the driver can be accomplished on the [sandbox OpenNebula VM](http://opennebula.org/tryout/sandboxvirtualbox/), but testing opportunities are limited because only 1 hypervisor is available (so VM migration testing is not possible). In addition, Virtualbox does not work with 64-bit nested VMs, limiting the developer to only 32-bit VMs.
-
-For this reason, a multiple-hypervisor OpenNebula KVM-Vagrant setup is provided in the `on-devenv` directory. Note that it is not possible to run both virtualbox and KVM on the same hosts at present. So if the saturn storage is also setup as a Vagrant environment then it also needs to be on KVM hypervisors. Please refer to the README file in that directory for further information.
-
-
 
 
 ## Contributors
@@ -209,5 +221,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
